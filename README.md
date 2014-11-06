@@ -1,7 +1,11 @@
 ## HOW CI Framework
 ###### [H]and [O]n [W]heel [C]ode[I]gniter Framework
 
-HOW é uma extensão do CodeIgniter que engloba basicamente um model genérico capaz de fornecer uma orientação a objetos mais forte que o CI_Model. Além disso, conta com um conjunto de helpers com funções dos mais variados gêneros.
+HOW é uma extensão do CodeIgniter que engloba:
+- Um model genérico capaz de fornecer uma orientação a objetos mais forte que o CI_Model.
+- Um conjunto de helpers com funções dos mais variados gêneros.
+- Utiliza o <a href="http://www.grocerycrud.com/codeigniter-simplicity">CodeIgniter Simplicity</a> para o gerenciamento de templates.
+- Utiliza o <a href="https://github.com/ericbarnes/codeigniter-simpletest">CodeIgniter SimpleTest</a> para testes unitários (testes dos helpers já vem incluídos).
 
 ### MY_Model
 -------------------
@@ -91,7 +95,7 @@ Retorna o número de registros da tabela.
 Retorna um array de objetos da classe chamada atendendo as condições passadas, que podem ser por array ou diretamente como string (cláusula where). Exemplos:
 ```php
 Classe::collection(array("nome" => "PhP"));
-Classe::collection(array("nome" => "PhP, "versao" => "5.3"), "nome");
+Classe::collection(array("nome" => "PhP", "versao" => "5.3"), "nome");
 Classe::collection("nome = 'PhP' AND versao <> '4.0'");
 ```
 ###### getInstance()
@@ -174,3 +178,141 @@ Retorna se o objeto é o último elemento em sua lista.
 Retorna se o objeto é o primeiro elemento em sua lista.
 ###### whereClauseFromScope()
 Retorna o texto da cláusula where baseado no scope.
+
+<br>
+### Gerenciamento de Template
+-----------
+O gerenciamento de templates é feito através do <a href="http://www.grocerycrud.com/codeigniter-simplicity">CI Simplicity</a>. Para informações de uso, consulte o site.
+
+<br>
+### Helpers
+-----------
+Os helpers contidos na HOW englobam uma séries de funções auxiliares, que vão desde manipulação de strings até validações, formatações e geradores de html.
+<br>
+##### Helper de arquivos
+###### send_file($file)
+"Cospe" um arquivo para download.
+###### remover_arquivo($arquivo)
+Remove um arquivo do disco.
+###### carregar_arquivo($arquivo, $params = array())
+Retorna uma string contendo o conteúdo do $arquivo passado.
+<br>
+##### Helper de arrays
+###### map($array, $key)
+Dado um $array de arrays ou de objetos, temos:
+- Para $array de arrays é retornado um novo array contendo cada valor da posição $key no $array.
+- Para $array de objeto é retornado um novo array contendo cada valor do atributo $key do $array.<br>
+Exemplo:
+```php
+map(array("id" => 5, "id" => 3), "id"); //retornará array(5, 3)
+```
+###### array_first($array)
+Retorna o primeiro elemento de um array.
+<br>
+##### Helper de banco de dados
+###### fields_of($tabela)
+Retorna um array contendo os campos da tabela passada.
+<br>
+##### Helper de codificações
+###### inserir_acentos($string)
+Substitui caracteres especiais por seus respectivos códigos em html.
+###### inserir_acentos2($string)
+Outra forma de substituir caracteres especiais por seus respectivos códigos em html.
+###### normalizar($string)
+Retira os acentos, caracteres especiais e espaços de uma string, além de converte-la para lowercase.
+###### capitalizar_nome($string)
+Converte um nome todo em maiúsculo para uma string com as primeiras letras maiúsculas, ignorando algumas palavras que não devem ser capitalizadas.
+<br>
+##### Helper de datas
+###### data_br_to_bd($data)
+Converte uma data do tipo dd/mm/aaaa para aaaa-mm-dd.
+###### data_br_to_en($data)
+Converte uma data do tipo mm/dd/aaaa para mm/dd/aaaa.
+###### data_bd_to_br($data)
+Converte uma data do tipo aaaa-mm-dd para dd/mm/aaaa.
+###### datetime_to_br($datetime)
+Converte algo do tipo "2014-11-06 15:54:30" para "06/11/2014 às 15:54".
+###### data_valida($data, $padrao = "br")
+Verifica se a data passada é válida de acordo com o padrão passado (br ou bd).
+###### hora_from_datetime($datetime)
+Retorna a hora de um datetime passado.
+###### diferenca_entre_horas($inicial, $final, $retorno = "horas")
+Retorna a diferença em horas entre as duas horas passadas.
+###### dia_semana($data, $padrao = "bd")
+Retorna o dia da semana da data passada.
+###### operacao_data($data, $operacao)
+Executa operações do tipo "+3 year" ou "-5 days" na data passada.
+###### hora_float_to_time($hora)
+Converte uma hora do tipo 5.5 para 05:30.
+###### dias_entre_datas($data1, $data2, $conta_com_ultima_data = false)
+Retorna a quantidade de dias entre duas datas.
+###### data1_maior_que_data2($data1, $data2)
+Verifica se a $data1 é maior que a $data2.
+###### data_buscar_semanas_completa($data_inicio, $data_fim)
+Retorna um array com todas as datas compreendidas entre a $data_inicio e a $data_fim junto com as datas extras para formar a semana. Da $data_inicio voltamos até encontrar um domingo e da $data_fim avançamos até encontrar um sábado.
+###### hora_valida($hora)
+Verifica se a hora passada está no formado hh:mm:ss e se é uma hora válida.
+###### datetime_valido($datetime)
+Verifica se o datetime passado é válido.
+###### hoje($padrao = "bd")
+Retorna a data de hoje.
+###### now()
+Retorna o datetime deste momento.
+###### tempo_relativo($datetime)
+Retorna algo do tipo "10 minutos atrás" de acordo com o $datetime passado.
+###### data_is_entre($data, $periodo1, $periodo2)
+Verifica se a $data está contida entre duas outras datas.
+<br>
+##### Helper de email
+###### enviar_email_smtp($destinatario, $assunto, $corpo)
+Processa um envio de email via smtp.
+###### enviar_email_convencional($destinatario, $assunto, $corpo)
+Processa um envio de email via função mail().
+###### enviar_email($destinatario, $assunto, $corpo)
+De acordo como a função for escrita, enviará email via smtp ou mail(). O ideal é configurar esta função e chamar somente ele.
+<br>
+##### Helper de formulários
+###### obrigatorio()
+Retorna aquele * para ser usado nos campos obrigatórios.
+##### options_for_select($options, $selecionado = "", $prompt = false)
+Retorna o html das options a partir de um array para ser usado em selects.
+##### options_for_select_from_collection($collection, $value, $label, $selecionado = "", $prompt = true)
+Retorna uma string de options a partir da collection passada. A collection é um array de objetos.
+<br>
+##### Helper de HTMLs auxiliares
+###### breadcrumb($itens = array())
+Gera o html do breadcrumb de acordo com o array passado.
+##### leia_mais_automatico($texto, $limite = 250, $mostrar_link = true)
+Corta o texto no comprimento passado e gera os links "mais" e "menos" quando necessário.
+<br>
+##### Helper de paginação
+###### usar_paginacao($resultados_por_pagina = 10, $tamanho_paginacao = 2)
+Inicia as constantes usadas na paginacao de resultados.
+###### paginacao($total_resultados, $pagina, $url, $parametros = "")
+Retorna o html da paginação.
+<br>
+##### Helper de strings, mensagens e validações
+###### underscore_to_camel_case($string, $capitalizeFirstCharacter = false)
+Converte algo do tipo "algo_do_tipo" para "algoDoTipo".
+###### camel_case_to_underscore($string)
+Converte algo do tipo "algoDoTipo" para "algo_do_tipo".
+###### formatar_string($string, $tipo)
+Formata a string passada de acordo com o tipo de máscada passada.<br>
+Opções de máscaras: cpf, cnpj, cep e telefone.
+###### custom_message($tipo, $texto)
+Retorna o html de cada tipo de mensagem customizada de informação. A implementação das classes no css são necessárias para que cada tipo de mensagem possua uma cor adequada.
+###### flash_messages()
+Retorna o html das mensagens para serem exibidas nas páginas, tanto de erros de formulários quanto mensagens flash.
+###### set_message($tipo, $mensagem)
+Coloca na sessão as mensagens de flash para serem obtidas através da function ```flash_messages()``` posteriormente.
+###### isNull($var)
+Verifica se uma variável é nula, inclusive se seu conteúdo for "null" ou "{{null}}".
+###### vazio($string)
+Retorna se a string ou array passado é vazio. Verifica também se um texto possui somente enters em seu conteudo.
+
+<br>
+### Testes Unitários
+-----------
+Caso queira utilizar testes unitários, a HOW já conta com o <a href="https://github.com/ericbarnes/codeigniter-simpletest">CodeIgniter SimpleTest</a>.<br>
+Todos os helpers da framework já possuem testes capazes de serem executados através do arquivo ```unit_test.php```.<br>
+Para informações de uso, consulte o site.
