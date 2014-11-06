@@ -1,3 +1,4 @@
+## HOW CI Framework
 ###### [H]and [O]n [W]heel [C]ode[I]gniter Framework
 
 HOW é uma extensão do CodeIgniter que engloba basicamente um model genérico capaz de fornecer uma orientação a objetos mais forte que o CI_Model. Além disso, conta com um conjunto de helpers com funções dos mais variados gêneros.
@@ -10,20 +11,20 @@ class Usuario extends MY_Model {
 }
 ```
 O exemplo acima é para uma classe que mapeará a tabela 'usuario' no banco de dados, escrita da forma mais básica possível.
-
+<br>
 ##### Métodos get e set e atributos privados
 Os atributos privados são gerados automaticamente a partir do schema do banco. Logo cada coluna da tabela resultará em um atributo da classe.<br>
 Apenas a título de conhecimento, todos os atributos são armazenados em um único chamado ``` $_private_attributes ```, que é um array do tipo chave=>valor, onde a chave é o nome da coluna da tabela. De qualquer forma, esse array nunca deve ser acessado diretamente.<br>
 Para acessar os atributos privados são criados, também automaticamente, métodos get e set para cada atributo. O padrão de nome desses métodos é: ```get``` + nome do atributo em camelcase. Assim, um atributo *nome* gerará os métodos ```getNome()``` e ```setNome($valor)```, e um atributo *nome_pai* gerará os métodos ```getNomePai()``` e ```setNomePai($valor)```.<br>
 Além disso, existem os métodos ```get($atributo)``` e ```set($atributo, $valor)``` para acesso direto à variável ```$_private_attributes```. Neste caso, o ```$atributo``` passado deve ser em formado underscore.
-
+<br>
 ##### Variável ``` $_table ```
 Define o nome da tabela referente no banco de dados. Não é necessário declarar esta variável. Por convenção o nome da tabela será a conversão do nome da classe, que deverá estar em formato camelcase, para o formato underscore. Assim, uma classe chamada *Usuario* deverá estar associada, por convenção, a uma tabela *usuario*, e uma classe *PessoaFisica* a uma tabela *pessoa_fisica*.<br>
 Caso o nome da tabela não esteja nesse padrão, a variável ``` $_table ``` deve ser declarada contendo o nome correto.
-
+<br>
 ##### Variável ``` $primary_key ```
 Esta variável teoricamente deveria representar o nome da chave primária da tabela, porém ainda não é totalmente utilizada. Então não altere o valor default *id* e certifique-se que sua tabela tenha uma chave primária chamada *id*.
-
+<br>
 ##### Relacionamento ```$belongs_to```
 Por convenção, todo campo terminado com *_id* gerará automaticamente um método de acesso ao objeto a que ele, teoricamente, faz referência. Em termos práticos, uma coluna com nome *perfil_id* gerará um método ```perfil()``` que assumirá que existe uma classe *Perfil* com um atributo *id*, e que retornará o objeto do tipo ```Perfil``` referente. Prático, não?<br>
 Além disso, é possível declarar esses relacionamento explicitamente na classe através da variável ```$belongs_to```. Ela deve conter um array descrevendo todos os relaciomentos deste tipo. Por exemplo:
@@ -36,7 +37,7 @@ public $belongs_to = array(
 ```
 No exemplo acima, várias coisas poderiam ser omitidas e tomadas por convenção. O relacionamento *departamento* irá assumir que exista a classe *Departamento* e que a coluna na tabela seja *departamento_id*. No relacionamento *perfil*, tanto o ```field``` quanto a ```class``` poderiam ser omitidos que a convenção iria assumi-los automaticamente. No caso do *chefe* são obrigatórios, já que o ```field``` e a ```class``` não seguem o padrão.<br>
 Para cada relacionamento será gerado um método com o mesmo nome para permitir o acesso aos objetos das respectivas classes. No exemplo acima seriam criados os métodos ```perfil()```, ```chefe()``` e ```departamento()```.
-
+<br>
 ##### Relacionamento ```$has_many```
 Os relacionamentos do tipo *has_many* deve ser sempre declarados e não são assumidos por convenção.
 ```php
@@ -48,7 +49,7 @@ public $has_many = array(
 No caso dos relaciomentos *has_many*, apesar de existir convenção para ```class``` e ```field``` é recomendado que sejam explicitamente definidos.<br>
 A chave ```order``` do array quando omitida será assumido o campo de ordenação padrão da classe, obtido através do método ```_default_order()``` (mais detalhes sobre isso mais adiante).<br>
 Cada relacionamento gerará um método de mesmo nome contendo um array de objetos do tipo definido na chave ```class```. No exemplo, teríamos os métodos ```dependentes()``` e ```tarefas()```.
-
+<br>
 ##### Validates
 Provavelmente o mais interessante da classe MY_Model são os validates.<br>
 Validates permitem definir na própria classe as regras de validação para cada atributo, similar à maneira de como é feito no *Ruby on Rails*. Assim, não é mais necessário o uso do form_validation nos controllers, exceto em casos muito específicos, e fica garantido que em qualquer parte do sistema as regras de existência de um objeto sejam sempre as mesmas.<br>
@@ -69,8 +70,8 @@ Como mencionado, é idêntico ao uso no form_validation nos controllers.<br>
 Para validações particulares, com o prefixo ```callback_```, os métodos de validação ficam na própria classe, assim como é feito nos controllers.<br>
 As regras de validação podem ser consultadas <a href="https://ellislab.com/codeigniter/user-guide/libraries/form_validation.html#rulereference">aqui</a>.<br>
 Mais adiante serão descritos os métodos de validação adicionais da library form_validation modificada.
-
-##### Métodos estáticos da classe MY_Model
+<br>
+##### Métodos estáticos (*class methods*) da classe MY_Model
 ###### get_called_class($bt = false, $l = 1)
 Retorna a classe que originou a chamada ao método. Útil para os métodos saberem o nome exato da classe que executou a chamada.<br>
 Normalmente é usado apenas em funções internas da framework. Raramente precisa ser invocada.
@@ -102,8 +103,8 @@ Em alguns casos é preciso passar uma instância da classe como parâmetro, para
 Retorna o primeiro registro da tabela ordenado por *id*.
 ###### last()
 Retorna o último registro da tabela ordenado por *id*.
-
-##### Métodos públicos da classe MY_Model
+<br>
+##### Métodos públicos (*instance methods*) da classe MY_Model
 ###### classAttributes()
 Retorna um array com todos os atributos públicos e protegidos de um objeto.
 ###### toArray()
@@ -137,7 +138,6 @@ Seta o valor de um atributo privado do objeto.
 Retorna o nome da tabela do objeto.
 ###### _default_order()
 Retorna o campo padrão para ordenação da tabela.
-
 <br>
 ##### Comportamento *acts_as_list*
 A classe MY_Model dá suporte a um comportamente especial chamado *acts_as_list*. Como o nome sugere, esse comportamento permite definir que determinada classe irá funcionar como uma lista ordenada de registro. A única exigêcia para utilizar este recurso é a tabela possuir uma coluna que irá armazenar a posição do objeto na lista. Exemplos.:
