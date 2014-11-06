@@ -3,6 +3,7 @@
 
 HOW é uma extensão do CodeIgniter que engloba:
 - Um model genérico capaz de fornecer uma orientação a objetos mais forte que o CI_Model.
+- Funções extras de validação na library form_validation.
 - Um conjunto de helpers com funções dos mais variados gêneros.
 - Utiliza o <a href="http://www.grocerycrud.com/codeigniter-simplicity">CodeIgniter Simplicity</a> para o gerenciamento de templates.
 - Utiliza o <a href="https://github.com/ericbarnes/codeigniter-simpletest">CodeIgniter SimpleTest</a> para testes unitários (testes dos helpers já vem incluídos).
@@ -180,9 +181,26 @@ Retorna se o objeto é o primeiro elemento em sua lista.
 Retorna o texto da cláusula where baseado no scope.
 
 <br>
-### Gerenciamento de Template
+### Library form_validation
 -----------
-O gerenciamento de templates é feito através do <a href="http://www.grocerycrud.com/codeigniter-simplicity">CI Simplicity</a>. Para informações de uso, consulte o site.
+Algumas coisas foram alteradas no form_validation para suportar as validações via model.<br>
+As mensagens de exibição agora são agrupadas. Caso existam 10 erros em um formulário todos eles estarão dentro de uma só div, e não um em cada separada como era antes.<br>
+Validações adicionadas:
+###### is_not_null($str)
+Validação que verifica se o campo é nulo usando a function isNull().
+###### data_valida($str)
+Verifica se a data é válida.
+###### not_data_futura($str)
+Verifica se a data é maior que hoje.
+###### minimo_dias_anteriores($str, $dias_pra_tras)
+Verifica se a data não é anterior a x dias.
+###### valor_entre($valor, $intervalo)
+Verifica se o campo está compreendido no intervalo passado.<br>
+O intervalo é passado no formato 1..6 (mínimo..máximo)
+###### hora1_maior_hora2($hora1, $campo_hora2)
+Verifica se a hora1 é menor que a hora do campo 2.
+###### data1_maior_data2($data1, $campo_data2)
+Verifica se a data1 é menor que a data do campo 2.
 
 <br>
 ### Helpers
@@ -309,6 +327,11 @@ Coloca na sessão as mensagens de flash para serem obtidas através da function 
 Verifica se uma variável é nula, inclusive se seu conteúdo for "null" ou "{{null}}".
 ###### vazio($string)
 Retorna se a string ou array passado é vazio. Verifica também se um texto possui somente enters em seu conteudo.
+
+<br>
+### Gerenciamento de Template
+-----------
+O gerenciamento de templates é feito através do <a href="http://www.grocerycrud.com/codeigniter-simplicity">CI Simplicity</a>. Para informações de uso, consulte o site.
 
 <br>
 ### Testes Unitários
