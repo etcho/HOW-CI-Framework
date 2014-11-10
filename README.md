@@ -1,4 +1,4 @@
-## HOW CI Framework
+﻿## HOW CI Framework
 ###### [H]and [O]n [W]heel [C]ode[I]gniter Framework
 
 HOW é uma extensão do CodeIgniter que engloba:
@@ -10,7 +10,7 @@ HOW é uma extensão do CodeIgniter que engloba:
 
 ### MY_Model
 -------------------
-Classe abstrata responsável pelo mapeamento objeto-relacional do banco. É recomendável que cada tabela do banco possua uma classe relacionada que herde desta. Por adotar convenções, a definição das classes pode ser muito simples:
+Classe abstrata responsável pelo mapeamento objeto-relacional do banco de dados. É recomendável que cada tabela do banco possua uma classe relacionada que herde desta. Por adotar convenções, a definição das classes pode ser muito simples:
 ```php
 class Usuario extends MY_Model {
 }
