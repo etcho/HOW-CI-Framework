@@ -9,13 +9,13 @@ class MY_Model extends CI_Model {
     protected $_table = null;
 
     /**
-     * Instância do objeto de conexão com o banco de dados. Não é necessário se preocupar com isso.
+     * InstÃ¢ncia do objeto de conexÃ£o com o banco de dados. NÃ£o Ã© necessÃ¡rio se preocupar com isso.
      * @var CI_Database
      */
     public $_database;
 
     /**
-     * Nome do campo que é chave primária na tabela. Redeclare na subclasse se precisar.
+     * Nome do campo que Ã© chave primÃ¡ria na tabela. Redeclare na subclasse se precisar.
      * @var string
      */
     protected $primary_key = 'id';
@@ -25,41 +25,41 @@ class MY_Model extends CI_Model {
      */
 
     /**
-     * public $belongs_to = array("usuario") criará um método usuario() em cada objeto, assumindo que exista
+     * public $belongs_to = array("usuario") criarÃ¡ um mÃ©todo usuario() em cada objeto, assumindo que exista
      *      uma classe Usuario e um campo usuario_id para referenciar.
      * public $belongs_to = array("usuario_aprovador" => array("class" => "Usuario", "field" => "usuario_aprovacao_id"))
-     *      criará um método usuario() em cada objeto, assumindo a classe passada e o campo usuario_aprovacao_id como referência.
-     * Se omitido o parâmetro class será assumido o nome do relacionamento em camel case. ex.: dep_pai viraria DepPai.
-     * Se omitido o parâmetro field será assumido o nome do relacionamento acrescido do sufixo _id.
+     *      criarÃ¡ um mÃ©todo usuario() em cada objeto, assumindo a classe passada e o campo usuario_aprovacao_id como referÃªncia.
+     * Se omitido o parÃ¢metro class serÃ¡ assumido o nome do relacionamento em camel case. ex.: dep_pai viraria DepPai.
+     * Se omitido o parÃ¢metro field serÃ¡ assumido o nome do relacionamento acrescido do sufixo _id.
      * @var array
      */
     public $belongs_to = array();
 
     /**
-     * public $has_many = array("usuarios") criará um método usuarios($order = null) em cada objeto, assumindo
-     *      que exista uma classe Usuario e um campo de relacionamento no padrão nome_da_classe_id, ordenando pelo $order,
+     * public $has_many = array("usuarios") criarÃ¡ um mÃ©todo usuarios($order = null) em cada objeto, assumindo
+     *      que exista uma classe Usuario e um campo de relacionamento no padrÃ£o nome_da_classe_id, ordenando pelo $order,
      *      quando informado.
      * public $has_many = array("usuarios_logados" => array("class" => "Usuario", "field" => "departamento_id", "order" => "nome") 
-     *      criará um método usuarios_logados($order = null) em cada objeto, indicando o que busca através da class, field e ordenando,
+     *      criarÃ¡ um mÃ©todo usuarios_logados($order = null) em cada objeto, indicando o que busca atravÃ©s da class, field e ordenando,
      *      opcionalmente, pelo campo desejado.
      * @var array
      */
     public $has_many = array();
 
     /**
-     * Regras de validação idênticas às definidas em um form_validation
+     * Regras de validaÃ§Ã£o idÃªnticas Ã s definidas em um form_validation
      * @var array 
      */
     static $validates = array();
 
     /**
-     * Guarda os erros de validação do objeto após a função isValid ser executada
+     * Guarda os erros de validaÃ§Ã£o do objeto apÃ³s a funÃ§Ã£o isValid ser executada
      * @var array
      */
     public $validation_errors = array();
 
     /**
-     * Essa variável irá manter uma instância da classe atual para ser usado em métodos estáticos, tipo singleton
+     * Essa variÃ¡vel irÃ¡ manter uma instÃ¢ncia da classe atual para ser usado em mÃ©todos estÃ¡ticos, tipo singleton
      * @var Current_class 
      */
     private static $_instance;
@@ -77,6 +77,8 @@ class MY_Model extends CI_Model {
         foreach ($table_columns as $column) {
             $this->_private_attributes[$column] = null;
         }
+
+        $this->validation_errors = array();
 
         /**
          * Trecho que prepara o comportamento acts_as_list caso ele esteja setado
@@ -96,7 +98,25 @@ class MY_Model extends CI_Model {
         }
 
         /**
-         * Trecho que converte o array ou a stdClass passada para os atributos da própria classe
+         * Trecho que prepara o comportamento acts_as_tree caso ele esteja setado
+         */
+        if (property_exists($this, "acts_as_tree")) {
+            if (gettype($this->acts_as_tree) != "array") {
+                $this->acts_as_tree = array();
+            }
+            if (!array_key_exists("field", $this->acts_as_tree)) {
+                $this->acts_as_tree["field"] = "parent_id";
+            }
+            if (!array_key_exists("order", $this->acts_as_tree)) {
+                $this->acts_as_tree["order"] = "id";
+            }
+            if (!array_key_exists("destroy_dependants", $this->acts_as_tree)) {
+                $this->acts_as_tree["destroy_dependants"] = false;
+            }
+        }
+
+        /**
+         * Trecho que converte o array ou a stdClass passada para os atributos da prÃ³pria classe
          */
         if (gettype($attributes) == "object" && get_class($attributes) == "stdClass") {
             $object = $attributes;
@@ -117,7 +137,7 @@ class MY_Model extends CI_Model {
         }
 
         /**
-         * Gera métodos de relacionamento para todos os campos da tabela que terminem com _id. ex.: usuario_id reflete em um método usuario()
+         * Gera mÃ©todos de relacionamento para todos os campos da tabela que terminem com _id. ex.: usuario_id reflete em um mÃ©todo usuario()
          */
         $class_attributes = $this->classAttributes();
         $columns = $table_columns;
@@ -138,7 +158,7 @@ class MY_Model extends CI_Model {
         }
 
         /**
-         * Gera métodos de relacionamento a partir do atributo público $belongs_to declarado na classe
+         * Gera mÃ©todos de relacionamento a partir do atributo pÃºblico $belongs_to declarado na classe
          */
         foreach ($this->belongs_to as $nome => $relacionamento) {
             if (is_numeric($nome)) {
@@ -157,7 +177,7 @@ class MY_Model extends CI_Model {
         }
 
         /**
-         * Gera métodos de relacionamento has_many, que retorna arrays com objetos do relacionamento
+         * Gera mÃ©todos de relacionamento has_many, que retorna arrays com objetos do relacionamento
          */
         foreach ($this->has_many as $nome => $relacionamento) {
             if (is_numeric($nome)) {
@@ -182,9 +202,9 @@ class MY_Model extends CI_Model {
 
     /**
      * Insere de fato um registro no banco.
-     * ESTE MÉTODO NUNCA DEVE SER CHAMADO DIRETAMENTE. Quem faz a chamada é o método save().
+     * ESTE MÃ‰TODO NUNCA DEVE SER CHAMADO DIRETAMENTE. Quem faz a chamada Ã© o mÃ©todo save().
      */
-    public function insert($data) {
+    private function insert($data, $soft = false) {
         if (gettype($data) == "array") {
             foreach ($data as $key => $value) {
                 if (isNull($value)) {
@@ -194,7 +214,7 @@ class MY_Model extends CI_Model {
         }
 
         if ($data !== FALSE) {
-            if (isset($this->acts_as_list) && !$this->isPersisted()) {
+            if (!$soft && isset($this->acts_as_list)) {
                 $ultimo = $this->lastRecordOnList();
                 $field = $this->acts_as_list["field"];
                 if ($ultimo) {
@@ -206,6 +226,11 @@ class MY_Model extends CI_Model {
 
             $this->_database->insert($this->_tablename(), $data);
             $insert_id = $this->_database->insert_id();
+
+            if (!$soft && isset($this->acts_as_tree)) {
+                self::rebuildTree();
+            }
+
             return self::find($insert_id);
         } else {
             return FALSE;
@@ -214,9 +239,9 @@ class MY_Model extends CI_Model {
 
     /**
      * Processa o update.
-     * ESTE MÉTODO NUNCA DEVE SER CHAMADO DIRETAMENTE. Quem faz a chamada é o método save().
+     * ESTE MÃ‰TODO NUNCA DEVE SER CHAMADO DIRETAMENTE. Quem faz a chamada Ã© o mÃ©todo save().
      */
-    public function update($primary_value, $data) {
+    private function update($primary_value, $data, $soft = false) {
         if (gettype($data) == "array") {
             foreach ($data as $key => $value) {
                 if (isNull($value)) {
@@ -226,7 +251,7 @@ class MY_Model extends CI_Model {
         }
 
         if ($data !== FALSE) {
-            if (isset($this->acts_as_list)) {
+            if (!$soft && isset($this->acts_as_list)) {
                 $field = $this->acts_as_list["field"];
                 $old_object = self::find($primary_value);
                 $scope = $this->acts_as_list["scope"];
@@ -244,7 +269,13 @@ class MY_Model extends CI_Model {
                     $data[$field] = $old_object->get($field);
                 }
             }
+
             $result = $this->_database->where($this->primary_key, $primary_value)->set($data)->update($this->_tablename());
+
+            if (!$soft && isset($this->acts_as_tree)) {
+                Cat::rebuildTree();
+            }
+
             return $result;
         } else {
             return FALSE;
@@ -252,8 +283,8 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna a classe que originou a chamada. Útil para os métodos saberem que devem utilizar o nome da classe
-     * específica e não o MY_Model.
+     * Retorna a classe que originou a chamada. Ãštil para os mÃ©todos saberem que devem utilizar o nome da classe
+     * especÃ­fica e nÃ£o o MY_Model.
      * @param boolean $bt
      * @param integer $l
      * @return type
@@ -297,7 +328,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna um array com todos os atributos públicos e protegidos de um objeto.
+     * Retorna um array com todos os atributos pÃºblicos e protegidos de um objeto.
      * @return array
      */
     public function classAttributes() {
@@ -400,7 +431,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Alias para a função getAll()
+     * Alias para a funÃ§Ã£o getAll()
      * @param string $order
      * @return array
      */
@@ -409,7 +440,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna o número de registros da tabela
+     * Retorna o nÃºmero de registros da tabela
      * @return integer
      */
     static function count() {
@@ -417,7 +448,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna um array de objetos da classe chamada atendendo as condições passadas, que podem ser por array ou diretamente como string (cláusula where).
+     * Retorna um array de objetos da classe chamada atendendo as condiÃ§Ãµes passadas, que podem ser por array ou diretamente como string (clÃ¡usula where).
      * ex.: Classe::collection(array("nome" => "PhP"))
      * ex.: Classe::collection(array("nome" => "PhP", "versao" => "5.3"), "nome")
      * ex.: Classe::collection("nome = 'PhP' AND versao <> '4.0'")
@@ -456,7 +487,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Remove o objeto atual no banco de dados, verificando primeiro se ele está apto a ser removido
+     * Remove o objeto atual no banco de dados, verificando primeiro se ele estÃ¡ apto a ser removido
      * @return boolean
      */
     public function delete() {
@@ -464,6 +495,15 @@ class MY_Model extends CI_Model {
             if (!$this->getId()) {
                 return false;
             }
+
+            if (isset($this->acts_as_tree) && $this->acts_as_tree["destroy_dependants"]) {
+                $children = $this->childrenOnTree();
+                $children = array_reverse($children);
+                foreach ($children as $child) {
+                    $child->delete();
+                }
+            }
+
             if (get_instance()->db->delete($this->_tablename(), array("id" => $this->getId()))) {
                 if (isset($this->acts_as_list)) {
                     $field = $this->acts_as_list["field"];
@@ -474,6 +514,11 @@ class MY_Model extends CI_Model {
                         $posterior->save();
                     }
                 }
+
+                if (isset($this->acts_as_tree)) {
+                    self::rebuildTree();
+                }
+
                 return true;
             }
         } else {
@@ -482,16 +527,19 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Executa o form_validation considerando a regras definidas na variável estática $validates.
-     * Caso seja passado o parâmetro $skip_fields, os campos passados por array não serão validados.
+     * Executa o form_validation considerando a regras definidas na variÃ¡vel estÃ¡tica $validates.
+     * Caso seja passado o parÃ¢metro $skip_fields, os campos passados por array nÃ£o serÃ£o validados.
      * @return boolean
      */
     public function isValid($skip_fields = array()) {
         $this->load->library("form_validation");
+        $this->lang->load("form_validation");
         $this->validation_errors = array();
+        $this->form_validation->reset_error_array();
         $classname = get_called_class();
         eval('$validates = ' . $classname . '::$validates;');
-        if (count($validates) > 0) {
+        $is_valid_as_tree = $this->isValidAsTree();
+        if (count($validates) > 0 || !$is_valid_as_tree) {
             $old_post = $_POST;
             $_POST = $this->toArray();
             $_POST["_current_class"] = $classname;
@@ -502,10 +550,13 @@ class MY_Model extends CI_Model {
                     $this->form_validation->set_rules($field, $field_label, $rules);
                 }
             }
-            if ($this->form_validation->run()) {
+            if ($this->form_validation->run() && $is_valid_as_tree) {
                 $_POST = $old_post;
                 return true;
             } else {
+                if (!$is_valid_as_tree) {
+                    $this->form_validation->append_error_array("parent_id", $this->lang->line("is_not_valid_as_tree"));
+                }
                 $this->validation_errors = array_merge($this->validation_errors, $this->form_validation->get_error_array());
                 $_POST = $old_post;
                 return false;
@@ -539,19 +590,22 @@ class MY_Model extends CI_Model {
 
     /**
      * Salva os valores dos atributos do objeto no banco, criando ou editando conforme necessidade.
-     * Caso seja passado true como parâmetro, as validações serão ignoradas
+     * Caso seja passado true como parÃ¢metro, as validaÃ§Ãµes serÃ£o ignoradas
      * @param boolean $skip_validation
+     * @param boolean $soft Caso true entÃ£o nÃ£o faz nada alÃ©m do insert ou do update
      * @return boolean or object
      */
-    public function save($skip_validation = false) {
+    public function save($skip_validation = false, $soft = false) {
         if ($skip_validation === true || (gettype($skip_validation) == "array" && $this->isValid($skip_validation)) || $this->isValid()) {
+            if (!$soft && !$this->isValidAsTree()) {
+                return false;
+            }
             $values = $this->toArray();
             unset($values["id"]);
             if ($this->isPersisted()) {
-                return $this->update($this->getId(), $values) ? true : false;
+                return $this->update($this->getId(), $values, $soft) ? true : false;
             } else {
-                $object = $this->insert($values);
-                return $object;
+                return $this->insert($values, $soft);
             }
         } else {
             return false;
@@ -559,7 +613,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna se o registro já está existe no banco, baseado no fato do id estar setado ou não
+     * Retorna se o registro jÃ¡ estÃ¡ existe no banco, baseado no fato do id estar setado ou nÃ£o
      * @return boolean
      */
     public function isPersisted() {
@@ -567,18 +621,21 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Cada classe poderá implementar este método para definir se o objeto pode ser removido do banco ou não (por dependência, por exemplo).
-     * No método delete() será verificado se o objeto isRemovable()
+     * Cada classe poderÃ¡ implementar este mÃ©todo para definir se o objeto pode ser removido do banco ou nÃ£o (por dependÃªncia, por exemplo).
+     * No mÃ©todo delete() serÃ¡ verificado se o objeto isRemovable()
      * @return boolean
      */
     public function isRemovable() {
+        if (isset($this->acts_as_tree) && !$this->acts_as_tree["destroy_dependants"]) {
+            return vazio($this->childrenOnTree());
+        }
         return true;
     }
 
     /**
-     * Método mágico que faz chamada de método através de um atributo (difícil até de explicar).
-     * Isso intercepta as chamadas de método para fazer esquema de entender relacionamento.
-     * PODE IGNORAR A EXISTÊNCIA DESSE MÉTODO.
+     * MÃ©todo mÃ¡gico que faz chamada de mÃ©todo atravÃ©s de um atributo (difÃ­cil atÃ© de explicar).
+     * Isso intercepta as chamadas de mÃ©todo para fazer esquema de entender relacionamento.
+     * PODE IGNORAR A EXISTÃŠNCIA DESSE MÃ‰TODO.
      * @param string $method
      * @param args $args
      * @return call
@@ -607,12 +664,16 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna uma instância da classe atual para ser usado em métodos estáticos
+     * Retorna uma instÃ¢ncia da classe atual para ser usado em mÃ©todos estÃ¡ticos
      * @return class_instance
      */
     static function getInstance() {
-        if (self::$_instance == null)
-            eval("self::\$_instance = new " . (self::get_called_class()) . "();");
+        if (self::$_instance == null) {
+            eval("self::\$_instance = new " . (get_called_class()) . "();");
+            if (get_class(self::$_instance) == "MY_Model") {
+                eval("self::\$_instance = new " . (self::get_called_class()) . "();");
+            }
+        }
         return self::$_instance;
     }
 
@@ -638,7 +699,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna o último registro da tabela ordenado por id
+     * Retorna o Ãºltimo registro da tabela ordenado por id
      * @return Current Class
      */
     static function last() {
@@ -678,18 +739,21 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna o campo padrão para ordenação da tabela
+     * Retorna o campo padrÃ£o para ordenaÃ§Ã£o da tabela
      * @return string
      */
     public function _default_order() {
         if (isset($this->acts_as_list)) {
             return $this->acts_as_list["field"];
         }
+        if (isset($this->acts_as_tree)) {
+            return "lft";
+        }
         return "id";
     }
 
 ###########################################
-## MÉTODOS DO COMPORTAMENTO ACTS_AS_LIST ##
+## MÃ‰TODOS DO COMPORTAMENTO ACTS_AS_LIST ##
 ###########################################
 
     /**
@@ -709,7 +773,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna o próximo objeto na lista
+     * Retorna o prÃ³ximo objeto na lista
      * @return record or null
      */
     public function nextRecordOnList() {
@@ -741,7 +805,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Move o objeto uma posição acima na lista
+     * Move o objeto uma posiÃ§Ã£o acima na lista
      * @return boolean
      */
     public function moveUpOnList() {
@@ -760,7 +824,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Move um objeto uma posição abaixo na lista
+     * Move um objeto uma posiÃ§Ã£o abaixo na lista
      * @return boolean
      */
     public function moveDownOnList() {
@@ -777,7 +841,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna o último registro da lista de um objeto, considerando seu scope
+     * Retorna o Ãºltimo registro da lista de um objeto, considerando seu scope
      * @return object or false
      */
     public function lastRecordOnList() {
@@ -796,7 +860,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna a posição do último elemento da lista de um objeto
+     * Retorna a posiÃ§Ã£o do Ãºltimo elemento da lista de um objeto
      * @return int
      */
     public function lastPositionOnList() {
@@ -808,7 +872,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna se o objeto é o último elemento em sua lista
+     * Retorna se o objeto Ã© o Ãºltimo elemento em sua lista
      * @return boolean
      */
     public function isLastOnList() {
@@ -820,7 +884,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna se o objeto é o primeiro elemento em sua lista
+     * Retorna se o objeto Ã© o primeiro elemento em sua lista
      * @return boolean
      */
     public function isFirstOnList() {
@@ -831,7 +895,7 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna o texto da cláusula where baseado no scope do acts_as_list
+     * Retorna o texto da clÃ¡usula where baseado no scope do acts_as_list
      * @return string
      */
     public function whereClauseFromScope() {
@@ -852,7 +916,140 @@ class MY_Model extends CI_Model {
     }
 
 ##################################
-## FIM DOS MÉTODOS ACTS_AS_LIST ##
+## FIM DOS MÃ‰TODOS ACTS_AS_LIST ##
+##################################
+###########################################
+## MÃ‰TODOS DO COMPORTAMENTO ACTS_AS_TREE ##
+###########################################
+
+    /**
+     * Retorna o item imediatamente acima na hierarquia
+     * @return object or null
+     */
+    function parentOnTree() {
+        if (isset($this->acts_as_tree)) {
+            $field = $this->acts_as_tree["field"];
+            return self::find($this->get($field));
+        }
+        return null;
+    }
+
+    /**
+     * Retorna o level do item na hierarquia
+     * @return integer or null
+     */
+    function levelOnTree() {
+        if (isset($this->acts_as_tree)) {
+            return $this->getLvl();
+        }
+        return null;
+    }
+
+    /**
+     * Retorna os filhos imediados do item
+     * @return array of object
+     */
+    function childrenOnTree($order = "_default_order") {
+        if (isset($this->acts_as_tree)) {
+            $order = $order == "_default_order" ? $this->_default_order() : $order;
+            $field = $this->acts_as_tree["field"];
+            return self::collection(array($field => $this->getId()), $order);
+        }
+        return null;
+    }
+
+    /**
+     * Retorna a Ã¡rvore de filhos do item incluindo ele mesmo
+     * @return array of object
+     */
+    function childrenTree() {
+        if (isset($this->acts_as_tree)) {
+            return self::collection("lft >= " . $this->getLft() . " AND lft < " . $this->getRgt());
+        }
+        return null;
+    }
+
+    /**
+     * Retorna a lista de pais do item incluindo ele mesmo
+     * @return array of object
+     */
+    function pathToRoot($reverse = false) {
+        if (isset($this->acts_as_tree)) {
+            $ary = self::collection("lft <= " . $this->getLft() . " AND rgt >= " . $this->getRgt());
+            if ($reverse) {
+                return array_reverse($ary);
+            } else {
+                return $ary;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retorna a quantidade de descendentes do item
+     * @return integer or null
+     */
+    function numberOfDescendants() {
+        if (isset($this->acts_as_tree)) {
+            return (($this->getRgt() - $this->getLft() - 1) / 2);
+        }
+        return null;
+    }
+
+    /**
+     * Remonta a tree completamente com base no parent da tabela
+     * @param object $parent
+     * @return boolean or null
+     */
+    static function rebuildTree($parent = null) {
+        if (isset(self::getInstance()->acts_as_tree)) {
+            $field = self::getInstance()->acts_as_tree["field"];
+            $order = self::getInstance()->acts_as_tree["order"];
+            if (!$parent) {
+                $branches = self::collection(array($field => null), $order);
+                $right = 1;
+            } else {
+                $branches = $parent->childrenOnTree($order);
+                $right = $parent->getLft();
+            }
+            if (!vazio($branches)) {
+                $previous_branch = null;
+                foreach ($branches as $branch) {
+                    if (!$previous_branch) {
+                        if (!$parent) {
+                            $branch->setLft(1);
+                        } else {
+                            $branch->setLft($parent->getLft() + 1);
+                        }
+                    } else {
+                        $branch->setLft($previous_branch->getRgt() + 1);
+                    }
+                    $branch->setLvl($parent ? $parent->getLvl() + 1 : 1);
+                    $right = self::rebuildTree($branch);
+                    $branch->setRgt($right);
+                    $branch->save(true, true);
+                    $previous_branch = $branch;
+                }
+            }
+            return $right + 1;
+        }
+        return null;
+    }
+
+    /**
+     * Verifica se a tree Ã© vÃ¡lida verificando se nÃ£o irÃ¡ gerar hierarquia recursiva
+     * @return boolean
+     */
+    function isValidAsTree() {
+        if (isset($this->acts_as_tree) && $this->isPersisted()) {
+            $children = $this->childrenTree();
+            return !in_array($this->getParentId(), map($children, "id"));
+        }
+        return true;
+    }
+
+##################################
+## FIM DOS MÃ‰TODOS ACTS_AS_LIST ##
 ##################################
 }
 

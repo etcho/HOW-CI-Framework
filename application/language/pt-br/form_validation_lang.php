@@ -31,6 +31,7 @@ $lang['minimo_dias_anteriores']         = "O campo %s não deve conter uma data 
 $lang['valor_entre']                    = "O campo %s deve ter um valor entre %s.";
 $lang['hora1_maior_hora2']              = "O campo %s não pode ser maior que o campo %s.";
 $lang['data1_maior_data2']              = "O campo %s não pode conter uma data maior que o campo %s.";
+$lang['is_not_valid_as_tree']           = "Essa alteração gera uma hierarquia inválida.";
 
 
 /* End of file form_validation_lang.php */

@@ -37,6 +37,14 @@ class MY_Form_validation extends CI_Form_validation {
         return $this->_error_array;
     }
 
+    public function reset_error_array() {
+        $this->_error_array = array();
+    }
+
+    public function append_error_array($field, $error) {
+        $this->_error_array[$field] = $error;
+    }
+
     /**
      * Executes the Validation routines
      * ** Alterada para reconhecer os validations feitos no próprio modelo **
@@ -281,14 +289,14 @@ class MY_Form_validation extends CI_Form_validation {
     public function hora1_maior_hora2($hora1, $campo_hora2) {
         return !data1_maior_que_data2($hora1, $_POST[$campo_hora2]);
     }
-    
+
     /**
      * Valida se uma data é menor que outra
      * @param string $data1
      * @param string $campo_data2
      * @return boolean
      */
-    public function data1_maior_data2($data1, $campo_data2){
+    public function data1_maior_data2($data1, $campo_data2) {
         return !data1_maior_que_data2($data1, $_POST[$campo_data2]);
     }
 
