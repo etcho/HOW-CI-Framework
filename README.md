@@ -181,6 +181,38 @@ Retorna se o objeto é o primeiro elemento em sua lista.
 Retorna o texto da cláusula where baseado no scope.
 
 <br>
+##### Comportamento *acts_as_tree*
+A classe MY_Model dá suporte a um comportamente especial chamado *acts_as_tree*. Esse comportamento permite definir que determinada classe irá funcionar como uma hierarquia de registros. A única exigência para utilizar este recurso é a tabela possuir as colunas lft (left), rgt (right), lvl (level) e a coluna que servirá como base para guiar a hierarquia, por definição chamado de parent_id. Exemplo:
+```php
+public $acts_as_tree = array("order" => "nome");
+```
+No exemplo acima, definimos que a classe em questão agirá como uma árvore, ordenando por *nome*.<br>
+A chave ```destroy_dependants``` define se na deleção os dependentes do registro em questão serão apagados (deleção em cascata).<br>
+É possível ainda não atribuir nenhum valor à variável. Neste caso será assumido o ```order``` padrão ("lft") e  ```destroy_dependants``` padrão ("false").<br>
+Outros exemplos:
+```php
+public $acts_as_tree;
+public $acts_as_tree = array("order" => "nome", "destroy_dependants" => true);
+```
+Ao usar o ```$acts_as_tree``` uma série de métodos públicos estarão disponíveis. São eles:
+###### parentOnTree()
+Retorna o item imediatamente acima na hierarquia.
+###### levelOnTree()
+Retorna o level do item na hierarquia.
+###### childrenOnTree($order = "_default_order")
+Retorna os filhos imediados do item.
+###### childrenTree()
+Retorna a árvore de filhos do item incluindo ele mesmo.
+###### pathToRoot($reverse = false)
+Retorna a lista de pais do item incluindo ele mesmo.
+###### numberOfDescendants()
+Retorna a quantidade de descendentes do item.
+###### rebuildTree($parent = null)
+Remonta a tree completamente com base no parent da tabela.
+###### isValidAsTree()
+Verifica se a tree é válida verificando se não irá gerar hierarquia recursiva.
+
+<br>
 ### Library form_validation
 -----------
 Algumas coisas foram alteradas no form_validation para suportar as validações via model.<br>
