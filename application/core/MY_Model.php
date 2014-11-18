@@ -273,7 +273,7 @@ class MY_Model extends CI_Model {
             $result = $this->_database->where($this->primary_key, $primary_value)->set($data)->update($this->_tablename());
 
             if (!$soft && isset($this->acts_as_tree)) {
-                Cat::rebuildTree();
+                self::rebuildTree();
             }
 
             return $result;
