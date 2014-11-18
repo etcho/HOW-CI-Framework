@@ -53,7 +53,18 @@ public $has_many = array(
 ```
 No caso dos relaciomentos *has_many*, apesar de existir convenção para ```class``` e ```field``` é recomendado que sejam explicitamente definidos.<br>
 A chave ```order``` do array quando omitida será assumido o campo de ordenação padrão da classe, obtido através do método ```_default_order()``` (mais detalhes sobre isso mais adiante).<br>
-Cada relacionamento gerará um método de mesmo nome contendo um array de objetos do tipo definido na chave ```class```. No exemplo, teríamos os métodos ```dependentes()``` e ```tarefas()```.
+Cada relacionamento gerará um método de mesmo nome contendo um array de objetos do tipo definido na chave ```class```. No exemplo, teríamos os métodos ```dependentes()``` e ```tarefas()```.<br><br>
+Em relacionamentos *n para n*, onde existe uma tabela intermediária fazendo a junção, é possível utilizar a chave *through* no relacionamento ```$has_many```. Quando utilizada, é preciso definir também a classe final dos objetos retornados:
+```php
+public $has_many = array(
+  "permissoes" => array("class" => "Permissao", "through" => "UsuarioPermissao", "foreign_key" => "permissao_id", "field" => "usuario_id"),
+  "perfis" => array("class" => "Perfil", "through" => "UsuarioPerfil", "order" => "nome")
+);
+```
+No exemplo acima, um objeto da classe em questão (usuario) terá os métodos ```permissoes()``` e ```perfis()```, retornando o array de objetos dos respectivos tipos.<br>
+A chave *foreign_key* pode ser omitida, sendo assumido o valor da chave *class* em formato underscore com o sufixo *_id*. A chave *field* pode ser omitida, sendo assumido o nome da classe do objeto em formato underscore com o sufixo *_id*.<br>
+Para que isso funcione, a tabela de relacionamento deve conter uma coluna *id* e as duas colunas contendo os ids das duas tabelas, no mínimo.
+
 <br>
 ##### Validates
 Provavelmente o mais interessante da classe MY_Model são os validates.<br>
