@@ -196,7 +196,13 @@ class MY_Model extends CI_Model {
             }
             eval('$id = $this->get' . underscore_to_camel_case($this->primary_key, true) . '();');
             $id = isNull($id) ? 0 : $id;
-            eval('$this->' . $nome . ' = create_function(\'$order = null, $default_order = "' . $relacionamento["order"] . '"\', \'$order = isNull($order) ? $default_order : $order; return ' . $relacionamento["class"] . '::collection(array("' . $relacionamento["field"] . '" => "' . $id . '"), $order);\');');
+            if (!isset($relacionamento["through"])) {
+                eval('$this->' . $nome . ' = create_function(\'$order = null, $default_order = "' . $relacionamento["order"] . '"\', \'$order = isNull($order) ? $default_order : $order; return ' . $relacionamento["class"] . '::collection(array("' . $relacionamento["field"] . '" => "' . $id . '"), $order);\');');
+            } else {
+                $foreign_key = isset($relacionamento["foreign_key"]) ? $relacionamento["foreign_key"] : camel_case_to_underscore($relacionamento["class"]) . "_id";
+                eval('$relationship_table = '.$relacionamento["through"].'::getInstance()->_tablename();');
+                eval('$this->' . $nome . ' = create_function(\'$order = null, $default_order = "' . $relacionamento["order"] . '"\', \' $order = isNull($order) ? $default_order : $order; return ' . $relacionamento["class"] . '::collection("id IN (SELECT '.$foreign_key.' FROM '.$relationship_table.' WHERE '.$relacionamento["field"].' = '.$id.')", $order); \');');
+            }
         }
     }
 
@@ -226,6 +232,7 @@ class MY_Model extends CI_Model {
 
             $this->_database->insert($this->_tablename(), $data);
             $insert_id = $this->_database->insert_id();
+            $this->setId($insert_id);
 
             if (!$soft && isset($this->acts_as_tree)) {
                 self::rebuildTree();
