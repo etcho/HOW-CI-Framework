@@ -200,8 +200,8 @@ class MY_Model extends CI_Model {
                 eval('$this->' . $nome . ' = create_function(\'$order = null, $default_order = "' . $relacionamento["order"] . '"\', \'$order = isNull($order) ? $default_order : $order; return ' . $relacionamento["class"] . '::collection(array("' . $relacionamento["field"] . '" => "' . $id . '"), $order);\');');
             } else {
                 $foreign_key = isset($relacionamento["foreign_key"]) ? $relacionamento["foreign_key"] : camel_case_to_underscore($relacionamento["class"]) . "_id";
-                eval('$relationship_table = '.$relacionamento["through"].'::getInstance()->_tablename();');
-                eval('$this->' . $nome . ' = create_function(\'$order = null, $default_order = "' . $relacionamento["order"] . '"\', \' $order = isNull($order) ? $default_order : $order; return ' . $relacionamento["class"] . '::collection("id IN (SELECT '.$foreign_key.' FROM '.$relationship_table.' WHERE '.$relacionamento["field"].' = '.$id.')", $order); \');');
+                eval('$relationship_table = ' . $relacionamento["through"] . '::getInstance()->_tablename();');
+                eval('$this->' . $nome . ' = create_function(\'$order = null, $default_order = "' . $relacionamento["order"] . '"\', \' $order = isNull($order) ? $default_order : $order; return ' . $relacionamento["class"] . '::collection("id IN (SELECT ' . $foreign_key . ' FROM ' . $relationship_table . ' WHERE ' . $relacionamento["field"] . ' = ' . $id . ')", $order); \');');
             }
         }
     }
@@ -508,6 +508,15 @@ class MY_Model extends CI_Model {
                 $children = array_reverse($children);
                 foreach ($children as $child) {
                     $child->delete();
+                }
+            }
+
+            foreach ($this->has_many as $relation_name => $relationship) {
+                if (isset($relationship["destroy_dependants"]) && $relationship["destroy_dependants"]) {
+                    eval('$objects = $this->' . $relation_name . '();');
+                    foreach ($objects as $object){
+                        $object->delete();
+                    }
                 }
             }
 

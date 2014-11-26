@@ -50,4 +50,13 @@ function leia_mais_automatico($texto, $limite = 250, $mostrar_link = true) {
     return $conteudo;
 }
 
+/**
+ * Retorna uma string contendo várias tags <br> de acordo com a quantidade passada
+ * @param string $number
+ * @return string
+ */
+function brs($number = 1){
+    return str_repeat("<br/>", $number);
+}
+
 ?>

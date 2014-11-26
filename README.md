@@ -48,12 +48,13 @@ Os relacionamentos do tipo *has_many* deve ser sempre declarados e não são ass
 ```php
 public $has_many = array(
   "dependentes" => array("class" => "Usuario", "field" => "pai_id", "order" => "nome"),
-  "tarefas" => array("class" => "Tarefa", "field" => "usuario_id")
+  "tarefas" => array("class" => "Tarefa", "field" => "usuario_id", "destroy_dependants" => true)
 );
 ```
 No caso dos relaciomentos *has_many*, apesar de existir convenção para ```class``` e ```field``` é recomendado que sejam explicitamente definidos.<br>
 A chave ```order``` do array quando omitida será assumido o campo de ordenação padrão da classe, obtido através do método ```_default_order()``` (mais detalhes sobre isso mais adiante).<br>
-Cada relacionamento gerará um método de mesmo nome contendo um array de objetos do tipo definido na chave ```class```. No exemplo, teríamos os métodos ```dependentes()``` e ```tarefas()```.<br><br>
+Cada relacionamento gerará um método de mesmo nome contendo um array de objetos do tipo definido na chave ```class```. No exemplo, teríamos os métodos ```dependentes()``` e ```tarefas()```.<br>
+Caso o parâmetro ```destroy_dependants``` seja passado com valor ```true```, quando um objeto da classe é removido, todos os objetos do relacionamento também serão. Use com cuidado.<br><br>
 Em relacionamentos *n para n*, onde existe uma tabela intermediária fazendo a junção, é possível utilizar a chave *through* no relacionamento ```$has_many```. Quando utilizada, é preciso definir também a classe final dos objetos retornados:
 ```php
 public $has_many = array(
@@ -345,6 +346,8 @@ Retorna uma string de options a partir da collection passada. A collection é um
 Gera o html do breadcrumb de acordo com o array passado.
 ##### leia_mais_automatico($texto, $limite = 250, $mostrar_link = true)
 Corta o texto no comprimento passado e gera os links "mais" e "menos" quando necessário.
+##### brs($number = 1)
+Retorna uma string contendo um determinado número de tags <br>.
 <br>
 ##### Helper de paginação
 ###### usar_paginacao($resultados_por_pagina = 10, $tamanho_paginacao = 2)
