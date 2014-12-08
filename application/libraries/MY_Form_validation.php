@@ -240,10 +240,12 @@ class MY_Form_validation extends CI_Form_validation {
     /**
      * Adiciona a validação data_valida como genérica para os validates
      * @param string $str
+     * @param boolean $aceita_vazio
      * @return boolean
      */
-    public function data_valida($str) {
-        return data_valida($str, "bd");
+    public function data_valida($str, $aceita_vazio = 'false') {
+        $aceita_vazio = $aceita_vazio == "true";
+        return data_valida($str, "bd", $aceita_vazio);
     }
 
     /**
@@ -298,6 +300,29 @@ class MY_Form_validation extends CI_Form_validation {
      */
     public function data1_maior_data2($data1, $campo_data2) {
         return !data1_maior_que_data2($data1, $_POST[$campo_data2]);
+    }
+
+    /**
+     * Sobrescrita do validate para não precisar informar a tabela no field e funcionar também para o update e não só para o insert
+     * @param string $str
+     * @param string $field
+     * @return boolean
+     */
+    public function is_unique($str, $field) {
+        $field = explode('.', $field);
+        if (count($field) == 1 && array_key_exists("_object", $_POST)){
+            $table = $_POST["_object"]->_tablename();
+            $field = $field[0];
+        }
+        else{
+            list($table, $field) = $field;
+        }
+        $where = "".$field." = '".$str."'";
+        if (array_key_exists("_object", $_POST) && $_POST["_object"]->isPersisted()){
+            $where .= " AND id <> '".$_POST["_object"]->getId()."'";
+        }
+        $query = $this->CI->db->limit(1)->get_where($table, $where);
+        return $query->num_rows() === 0;
     }
 
 }

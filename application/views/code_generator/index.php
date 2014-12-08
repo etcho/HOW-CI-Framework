@@ -1,0 +1,1 @@
+<a href="<?= site_url("code_generator/ler_schema") ?>">Ler schema do banco e armazena-lo em session</a>

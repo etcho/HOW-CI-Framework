@@ -42,7 +42,10 @@ function datetime_to_br($datetime) {
  * @param string $padrao
  * @return boolean
  */
-function data_valida($data, $padrao = "br") {
+function data_valida($data, $padrao = "br", $aceita_vazio = false) {
+    if ($aceita_vazio && vazio($data)){
+        return true;
+    }
     if ($padrao == "br") {
         $data = explode("/", $data);
         if (count($data) == 3) {

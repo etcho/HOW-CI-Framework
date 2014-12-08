@@ -13,6 +13,8 @@ class test_dds_datas_helper extends CodeIgniterUnitTestCase
         $this->assertFalse(data_valida("32/09/2014"));
         $this->assertFalse(data_valida("19/13/2014"));
         $this->assertFalse(data_valida("19/09/2014", "bd"));
+        $this->assertFalse(data_valida(""));
+        $this->assertTrue(data_valida("", null, true));
     }
     
     public function teste_data_br_to_bd(){

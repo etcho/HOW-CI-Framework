@@ -15,15 +15,17 @@ function obrigatorio() {
  * @param boolean|string $prompt
  * @return string
  */
-function options_for_select($options, $selecionado = "", $prompt = false) {
+function options_for_select($options, $selecionado = "", $prompt = false, $usar_texto_como_valor = false) {
     if ($prompt != false) {
         if (gettype($prompt) == "boolean")
             $conteudo = array(options_for_select(array("null" => "-- Selecione --")));
         else
             $conteudo = array(options_for_select(array("null" => $prompt)));
     }
-    foreach ($options as $valor => $texto)
+    foreach ($options as $valor => $texto){
+        $valor = $usar_texto_como_valor ? $texto : $valor;
         $conteudo[] = '<option value="' . $valor . '"' . ($valor == $selecionado ? " selected" : "") . '>' . $texto . '</option>';
+    }
     return implode("", $conteudo);
 }
 
