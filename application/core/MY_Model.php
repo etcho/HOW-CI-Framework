@@ -385,6 +385,7 @@ class MY_Model extends CI_Model {
         $result = $CI->db->get($object->_tablename())->result();
         if (count($result) > 0) {
             eval('$new = new ' . $classname . '($result[0]);');
+            HowCore::setCachedObject($new);
             return $new;
         }
         return null;
@@ -396,6 +397,11 @@ class MY_Model extends CI_Model {
      * @return current_class
      */
     static function find($id) {
+        $cache = HowCore::getCachedObject(get_called_class(), $id);
+        if (!($cache instanceof NullValue)) {
+            return $cache;
+        }
+
         return self::findBy("id", $id);
     }
 
@@ -415,6 +421,7 @@ class MY_Model extends CI_Model {
         $array = array();
         foreach ($result as $value) {
             eval('$array[] = new ' . $classname . '($value);');
+            HowCore::setCachedObject($array[count($array) - 1]);
         }
         return $array;
     }
@@ -433,6 +440,7 @@ class MY_Model extends CI_Model {
         $array = array();
         foreach ($result as $value) {
             eval('$array[] = new ' . $classname . '($value);');
+            HowCore::setCachedObject($array[count($array) - 1]);
         }
         return $array;
     }
@@ -489,6 +497,7 @@ class MY_Model extends CI_Model {
         $array = array();
         foreach ($result as $value) {
             eval('$array[] = new ' . $classname . '($value);');
+            HowCore::setCachedObject($array[count($array) - 1]);
         }
         return $array;
     }
@@ -514,13 +523,14 @@ class MY_Model extends CI_Model {
             foreach ($this->has_many as $relation_name => $relationship) {
                 if (isset($relationship["destroy_dependants"]) && $relationship["destroy_dependants"]) {
                     eval('$objects = $this->' . $relation_name . '();');
-                    foreach ($objects as $object){
+                    foreach ($objects as $object) {
                         $object->delete();
                     }
                 }
             }
 
             if (get_instance()->db->delete($this->_tablename(), array("id" => $this->getId()))) {
+                HowCore::unsetCachedObject($this);
                 if (isset($this->acts_as_list)) {
                     $field = $this->acts_as_list["field"];
                     $where = $this->whereClauseFromScope();
@@ -619,10 +629,14 @@ class MY_Model extends CI_Model {
             $values = $this->toArray();
             unset($values["id"]);
             if ($this->isPersisted()) {
-                return $this->update($this->getId(), $values, $soft) ? true : false;
+                $return = $this->update($this->getId(), $values, $soft) ? true : false;
             } else {
-                return $this->insert($values, $soft);
+                $return = $this->insert($values, $soft);
             }
+            if ($return) {
+                HowCore::setCachedObject($this);
+            }
+            return $return;
         } else {
             return false;
         }

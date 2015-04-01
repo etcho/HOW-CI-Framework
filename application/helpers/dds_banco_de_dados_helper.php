@@ -6,11 +6,19 @@
  * @return array
  */
 function fields_of($tabela) {
+    $cache = HowCore::getCachedFunction("fields_of", func_get_args());
+    if (!($cache instanceof NullValue)){
+        return $cache;
+    }
+    
     $CI = get_instance();
-    $fields = mysql_query("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '".$CI->db->database."' AND TABLE_NAME = '".$tabela."'");
+    $results = $CI->db->query("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" . $CI->db->database . "' AND TABLE_NAME = '" . $tabela . "'")->result();
     $list = array();
-    while ($field = mysql_fetch_array($fields))
-        $list[] = $field["COLUMN_NAME"];
+    foreach ($results as $row) {
+        $list[] = $row->COLUMN_NAME;
+    }
+    
+    HowCore::setCachedFunction("fields_of", func_get_args(), $list);
     return $list;
 }
 
