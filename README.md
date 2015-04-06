@@ -1,6 +1,8 @@
 ﻿## HOW CI Framework
 ###### [H]and [O]n [W]heel [C]ode[I]gniter Framework
 
+*Testado no CodeIgniter 2.2 e 3.0*
+
 HOW é uma extensão do CodeIgniter que engloba:
 - Um model genérico capaz de fornecer uma orientação a objetos mais forte que o CI_Model.
 - Funções extras de validação na library form_validation.
@@ -373,6 +375,25 @@ Coloca na sessão as mensagens de flash para serem obtidas através da function 
 Verifica se uma variável é nula, inclusive se seu conteúdo for "null" ou "{{null}}".
 ###### vazio($string)
 Retorna se a string ou array passado é vazio. Verifica também se um texto possui somente enters em seu conteudo.
+
+<br>
+### Cache a nível de request
+-----------
+O HOW implementa um cache que permite armazenar resultados de funções e objetos de classes herdeiras de MY_Model. Com isso as idas ao banco diminuem consideravelmente, já um objeto de uma classe com determinado id será buscado no banco apenas uma vez a cada request.
+###### ```HowCore::disableCache()```
+Desativa o cache para todo o restante da execução do request.
+###### ```HowCore::enableCache()```
+Ativa o cache para todo o restante da execução do request.
+###### ```HowCore::getCachedFunction($function_name, $args)```
+Obtém o valor cacheado de uma chamada de função. Exemplo de uso encontra-se na função ```fields_of``` no helper de banco de dados.
+###### ```HowCore::setCachedFunction($function_name, $args, $value)```
+Salva o retorno de uma função no cache. Exemplo de uso encontra-se na função ```fields_of``` no helper de banco de dados.
+###### ```HowCore::getCachedObject($class, $id)```
+Obtém do cache o objeto da $class informada com o $id informado, caso já exista em cache. Exemplo de uso encontra-se no método ```findBy``` da classe MY_model.
+###### ```HowCore::setCachedObject($object)```
+Salva um objeto do banco no cache. Exemplo de uso encontra-se no método ```findBy``` da classe MY_model.
+###### ```HowCore::unsetCachedObject($object)```
+Remove um objeto do cache caso ele seja deletado do banco. Exemplo de uso encontra-se no método ```delete``` da classe MY_model.
 
 <br>
 ### Gerenciamento de Template

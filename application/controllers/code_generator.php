@@ -6,7 +6,6 @@ class Code_Generator extends CI_Controller {
         parent::__construct();
         $this->load->library("howcore");
         $this->output->set_template("code_generator");
-        session_start();
     }
 
     /**
