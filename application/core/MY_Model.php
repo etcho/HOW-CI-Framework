@@ -214,7 +214,7 @@ class MY_Model extends CI_Model {
         if (gettype($data) == "array") {
             foreach ($data as $key => $value) {
                 if (isNull($value)) {
-                    $data[$key] = null;
+                    unset($data[$key]);
                 }
             }
         }
