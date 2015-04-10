@@ -96,7 +96,7 @@ class HowCore {
             $cached_objects = self::$cache_objects[$class];
             foreach ($cached_objects as $obj) {
                 if ($obj["id"] == $id) {
-                    return $obj["object"];
+                    return clone $obj["object"];
                 }
             }
         }
@@ -125,7 +125,7 @@ class HowCore {
                         self::unsetCachedObject($obj["object"]);
                     }
                 }
-                self::$cache_objects[$class][] = array("id" => $id, "object" => $object);
+                self::$cache_objects[$class][] = array("id" => $id, "object" => clone $object);
             }
         }
     }

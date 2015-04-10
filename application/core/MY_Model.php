@@ -623,6 +623,9 @@ class MY_Model extends CI_Model {
      */
     public function save($skip_validation = false, $soft = false) {
         if ($skip_validation === true || (gettype($skip_validation) == "array" && $this->isValid($skip_validation)) || $this->isValid()) {
+            if ($skip_validation === false && $this->isPersisted() && !$this->isEditable()){
+                return false;
+            }
             if (!$soft && !$this->isValidAsTree()) {
                 return false;
             }
