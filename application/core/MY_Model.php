@@ -623,7 +623,7 @@ class MY_Model extends CI_Model {
      */
     public function save($skip_validation = false, $soft = false) {
         if ($skip_validation === true || (gettype($skip_validation) == "array" && $this->isValid($skip_validation)) || $this->isValid()) {
-            if ($skip_validation === false && $this->isPersisted() && !$this->isEditable()){
+            if ($skip_validation === false && $this->isPersisted() && !$this->isEditable()) {
                 return false;
             }
             if (!$soft && !$this->isValidAsTree()) {
@@ -664,13 +664,13 @@ class MY_Model extends CI_Model {
         }
         return true;
     }
-    
+
     /**
      * Cada classe poderá implementar este método para definir se o objeto pode ser editado ou não.
      * No método save() será verificado se o objeto isEditable()
      * @return boolean
      */
-    public function isEditable(){
+    public function isEditable() {
         return true;
     }
 
@@ -792,6 +792,16 @@ class MY_Model extends CI_Model {
             return "lft";
         }
         return "id";
+    }
+
+    /**
+     * Preenche somente os atributos do objeto que forem passado no $array de chave e valor
+     * @param array $array
+     */
+    function setAttributesFromArray($array) {
+        foreach ($array as $key => $value) {
+            $this->set($key, $value);
+        }
     }
 
 ###########################################
@@ -948,7 +958,11 @@ class MY_Model extends CI_Model {
                 $scope = gettype($acts_as_list["scope"]) == "array" ? $acts_as_list["scope"] : array($acts_as_list["scope"]);
                 $where = array();
                 foreach ($scope as $attr) {
-                    $where[] = $attr . " = '" . $this->get($attr) . "'";
+                    if (!isNull($this->get($attr))) {
+                        $where[] = $attr . " = '" . $this->get($attr) . "'";
+                    } else {
+                        $where[] = $attr . " IS NULL ";
+                    }
                 }
                 $where = implode(" AND ", $where);
                 return $where;
