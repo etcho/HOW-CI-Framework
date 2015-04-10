@@ -88,7 +88,7 @@ $autoload['drivers'] = array();
 |	$autoload['helper'] = array('url', 'file');
 */
 
-$autoload['helper'] = array("url", "dds_banco_de_dados", "dds_datas", "dds_forms", "dds_html_auxiliares", "dds_paginacao", "dds_strings_mensagens_validacoes", "dds_array");
+$autoload['helper'] = array("url", "dds_banco_de_dados", "dds_datas", "dds_forms", "dds_html_auxiliares", "dds_paginacao", "dds_strings_mensagens_validacoes", "dds_array", "dds_url");
 
 
 /*

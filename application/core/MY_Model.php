@@ -661,6 +661,15 @@ class MY_Model extends CI_Model {
         }
         return true;
     }
+    
+    /**
+     * Cada classe poderá implementar este método para definir se o objeto pode ser editado ou não.
+     * No método save() será verificado se o objeto isEditable()
+     * @return boolean
+     */
+    public function isEditable(){
+        return true;
+    }
 
     /**
      * Método mágico que faz chamada de método através de um atributo (difícil até de explicar).
