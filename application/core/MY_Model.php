@@ -57,12 +57,6 @@ class MY_Model extends CI_Model {
      * @var array
      */
     public $validation_errors = array();
-
-    /**
-     * Essa variável irá manter uma instância da classe atual para ser usado em métodos estáticos, tipo singleton
-     * @var Current_class 
-     */
-    private static $_instance;
     protected $_private_attributes = array();
 
     /**
@@ -132,7 +126,9 @@ class MY_Model extends CI_Model {
                         }
                     }
                 }
-                $this->_private_attributes[$attr] = $value;
+                if (array_key_exists($attr, $this->_private_attributes)) {
+                    $this->_private_attributes[$attr] = $value;
+                }
             }
         }
 
@@ -455,14 +451,6 @@ class MY_Model extends CI_Model {
     }
 
     /**
-     * Retorna o número de registros da tabela
-     * @return integer
-     */
-    static function count() {
-        return count(self::getAll());
-    }
-
-    /**
      * Retorna um array de objetos da classe chamada atendendo as condições passadas, que podem ser por array ou diretamente como string (cláusula where).
      * ex.: Classe::collection(array("nome" => "PhP"))
      * ex.: Classe::collection(array("nome" => "PhP", "versao" => "5.3"), "nome")
@@ -500,6 +488,40 @@ class MY_Model extends CI_Model {
             HowCore::setCachedObject($array[count($array) - 1]);
         }
         return $array;
+    }
+
+    /**
+     * Retorna o count a partir das condições passadas, que podem ser por array ou diretamente como string (cláusula where).
+     * ex.: Classe::collection(array("nome" => "PhP"))
+     * ex.: Classe::collection(array("nome" => "PhP", "versao" => "5.3"), "nome")
+     * ex.: Classe::collection("nome = 'PhP' AND versao <> '4.0'")
+     * @param array|string $condicoes
+     * @return int
+     */
+    static function count($condicoes = array()) {
+        $CI = get_instance();
+        $classname = get_called_class();
+        eval('$object = new ' . $classname . '();');
+        $sql = "SELECT COUNT(1) AS 'quantidade'
+                  FROM " . $object->_tablename();
+        if (gettype($condicoes) == "array") {
+            if (sizeof($condicoes) > 0 || $condicoes != "") {
+                foreach ($condicoes as $condicao => $valor) {
+                    if (is_null($valor)) {
+                        $where[] = $condicao . " IS NULL";
+                    } else {
+                        $where[] = $condicao . " = '" . $valor . "'";
+                    }
+                }
+                if (sizeof($where) > 0) {
+                    $sql .= " WHERE " . implode(" AND ", $where);
+                }
+            }
+        } elseif (!empty($condicoes)) {
+            $sql .= " WHERE " . $condicoes;
+        }
+        $result = $CI->db->query($sql)->result();
+        return $result[0]->quantidade;
     }
 
     /**
@@ -567,7 +589,10 @@ class MY_Model extends CI_Model {
         $is_valid_as_tree = $this->isValidAsTree();
         if (count($validates) > 0 || !$is_valid_as_tree) {
             $old_post = $_POST;
-            $_POST = $this->toArray();
+            $array = $this->toArray();
+            foreach ($array as $key => $item) {
+                $_POST[$key] = $item;
+            }
             $_POST["_current_class"] = $classname;
             $_POST["_object"] = $this;
             foreach ($validates as $validate) {
@@ -581,7 +606,8 @@ class MY_Model extends CI_Model {
                 return true;
             } else {
                 if (!$is_valid_as_tree) {
-                    $this->form_validation->append_error_array("parent_id", $this->lang->line("is_not_valid_as_tree"));
+                    $field = self::getInstance()->acts_as_tree["field"];
+                    $this->form_validation->append_error_array($field, $this->lang->line("is_not_valid_as_tree"));
                 }
                 $this->validation_errors = array_merge($this->validation_errors, $this->form_validation->get_error_array());
                 $_POST = $old_post;
@@ -710,13 +736,11 @@ class MY_Model extends CI_Model {
      * @return class_instance
      */
     static function getInstance() {
-        if (self::$_instance == null) {
-            eval("self::\$_instance = new " . (get_called_class()) . "();");
-            if (get_class(self::$_instance) == "MY_Model") {
-                eval("self::\$_instance = new " . (self::get_called_class()) . "();");
-            }
+        eval("\$instance = new " . (get_called_class()) . "();");
+        if (get_class($instance) == "MY_Model") {
+            eval("\$instance = new " . (self::get_called_class()) . "();");
         }
-        return self::$_instance;
+        return $instance;
     }
 
     /**
@@ -785,11 +809,11 @@ class MY_Model extends CI_Model {
      * @return string
      */
     public function _default_order() {
-        if (isset($this->acts_as_list)) {
-            return $this->acts_as_list["field"];
-        }
         if (isset($this->acts_as_tree)) {
             return "lft";
+        }
+        if (isset($this->acts_as_list)) {
+            return $this->acts_as_list["field"];
         }
         return "id";
     }
@@ -1058,9 +1082,10 @@ class MY_Model extends CI_Model {
      * @return boolean or null
      */
     static function rebuildTree($parent = null) {
-        if (isset(self::getInstance()->acts_as_tree)) {
-            $field = self::getInstance()->acts_as_tree["field"];
-            $order = self::getInstance()->acts_as_tree["order"];
+        $instance = self::getInstance();
+        if (isset($instance->acts_as_tree)) {
+            $field = $instance->acts_as_tree["field"];
+            $order = $instance->acts_as_tree["order"];
             if (!$parent) {
                 $branches = self::collection(array($field => null), $order);
                 $right = 1;
@@ -1099,13 +1124,29 @@ class MY_Model extends CI_Model {
     function isValidAsTree() {
         if (isset($this->acts_as_tree) && $this->isPersisted()) {
             $children = $this->childrenTree();
-            return !in_array($this->getParentId(), map($children, "id"));
+            $field = self::getInstance()->acts_as_tree["field"];
+            return !in_array($this->get($field), map($children, "id"));
         }
         return true;
     }
 
+    /**
+     * Retorna o valor do campo do objeto precedido de identação
+     * @param string $field
+     * @param string $separator
+     * @return string
+     */
+    function getIdentedField($field, $separator = "&nbsp; &nbsp; &nbsp; ") {
+        $level = $this->getLvl();
+        if ($level >= 0) {
+            $pad = str_pad("", ($this->getLvl() - 1) * strlen($separator), $separator, STR_PAD_LEFT);
+            return $pad . $this->get($field);
+        }
+        return $this->get($field);
+    }
+
 ##################################
-## FIM DOS MÉTODOS ACTS_AS_LIST ##
+## FIM DOS MÉTODOS ACTS_AS_TREE ##
 ##################################
 }
 

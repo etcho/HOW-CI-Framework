@@ -54,7 +54,7 @@ function enviar_email_convencional($destinatario, $assunto, $corpo){
  * @return boolean
  */
 function enviar_email($destinatario, $assunto, $corpo){
-	return enviar_email_smtp($destinatario, $assunto, $corpo);
+	return enviar_email_convencional($destinatario, $assunto, $corpo);
 }
 
 ?>

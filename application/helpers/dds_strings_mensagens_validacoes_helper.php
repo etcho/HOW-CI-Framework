@@ -19,13 +19,13 @@ function underscore_to_camel_case($string, $capitalizeFirstCharacter = false) {
  * @param string $string
  * @return string
  */
-function camel_case_to_underscore($string){
+function camel_case_to_underscore($string) {
     $str = "";
-    for ($i=0; $i<strlen($string); $i++){
-        if ($i > 0 && strtolower($string[$i]) != $string[$i]){
+    for ($i = 0; $i < strlen($string); $i++) {
+        if ($i > 0 && strtolower($string[$i]) != $string[$i]) {
             $str .= "_";
         }
-       $str .= strtolower($string[$i]);
+        $str .= strtolower($string[$i]);
     }
     return $str;
 }
@@ -110,7 +110,7 @@ function flash_messages() {
         $conteudo .= custom_message("alerta", $alerta);
     if ($info)
         $conteudo .= custom_message("info", $info);
-    $CI->session->unset_userdata(array("msg_sucesso" => "", "msg_erro" => "", "msg_alerta" => "", "msg_info" => ""));
+    $CI->session->unset_userdata(array("msg_sucesso", "msg_erro", "msg_alerta", "msg_info"));
     $conteudo .= validation_errors();
     return $conteudo;
 }
@@ -153,6 +153,46 @@ function vazio($string) {
             return strlen(trim(str_replace("\n", "", $string))) == 0;
             break;
     }
+}
+
+/**
+ * Transforma um array de string em uma string separada por ', ' e ' e ' para a última posição
+ * @param array $array
+ * @return string
+ */
+function array_humanizado($array) {
+    $string = '';
+    for ($i = 0; $i < count($array); $i++) {
+        if (count($array) > 1 && $i == count($array) - 1) {
+            $string.= ' e ' . $array[$i];
+        } else {
+            $string .= ($i > 0 ? ', ' : '' ) . $array[$i];
+        }
+    }
+    echo $string;
+}
+
+/**
+ * Verifica se a string informada possui o padrão de um hash MD5
+ * @param string $md5
+ * @return bool
+ */
+function isValidMd5($md5 = '') {
+    return strlen($md5) == 32 && ctype_xdigit($md5);
+}
+
+/**
+ * Retorna a string passada repetida x vezes
+ * @param string $string
+ * @param int $number
+ * @return string
+ */
+function repeat_string($string, $number = 2) {
+    $return = "";
+    for ($i = 0; $i <= $number; $i++) {
+        $return += $string;
+    }
+    return $string;
 }
 
 ?>
