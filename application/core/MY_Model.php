@@ -131,9 +131,17 @@ class MY_Model extends CI_Model {
                 }
             }
         }
+        /**
+         * Preenchendo o atributo type para os casos de herança
+         */
+        if (vazio($this->getType())) {
+            if (array_key_exists("type", $this->_private_attributes)) {
+                $this->setType(get_called_class());
+            }
+        }
 
         /**
-         * Gera métodos de relacionamento para todos os campos da tabela que terminem com _id. ex.: usuario_id reflete em um método usuario()
+         * Gera métodos de relacionamento para todos os campos da tabela que terminem  com _id. ex.: usuario_id reflete em um método usuario()
          */
         $class_attributes = $this->classAttributes();
         $columns = $table_columns;
@@ -164,7 +172,7 @@ class MY_Model extends CI_Model {
             if (!isset($relacionamento["class"])) {
                 $relacionamento["class"] = underscore_to_camel_case($nome, true);
             }
-            if (!isset($relacionamento["field"])) {
+            if (!isset($relacionamento ["field"])) {
                 $relacionamento["field"] = $nome . "_id";
             }
             eval('$id = $this->get' . underscore_to_camel_case($relacionamento["field"], true) . '();');
@@ -187,19 +195,32 @@ class MY_Model extends CI_Model {
             if (!isset($relacionamento["field"])) {
                 $relacionamento["field"] = camel_case_to_underscore(get_class($this)) . "_id";
             }
-            if (!isset($relacionamento["order"])) {
+            if (!isset($relacionamento ["order"])) {
                 $relacionamento["order"] = $this->_default_order();
             }
             eval('$id = $this->get' . underscore_to_camel_case($this->primary_key, true) . '();');
             $id = isNull($id) ? 0 : $id;
             if (!isset($relacionamento["through"])) {
-                eval('$this->' . $nome . ' = create_function(\'$order = null, $default_order = "' . $relacionamento["order"] . '"\', \'$order = isNull($order) ? $default_order : $order; return ' . $relacionamento["class"] . '::collection(array("' . $relacionamento["field"] . '" => "' . $id . '"), $order);\');');
+                eval('$this->' . $nome . ' = create_function(\'$order = null, $default_order = "' . $relacionamento ["order"] . '"\', \'$order = isNull($order) ? $default_order : $order; return ' . $relacionamento["class"] . '::collection(array("' . $relacionamento["field"] . '" => "' . $id . '"), $order);\');');
             } else {
-                $foreign_key = isset($relacionamento["foreign_key"]) ? $relacionamento["foreign_key"] : camel_case_to_underscore($relacionamento["class"]) . "_id";
-                eval('$relationship_table = ' . $relacionamento["through"] . '::getInstance()->_tablename();');
+                $foreign_key = isset($relacionamento["foreign_key"]) ? $relacionamento["foreign_key"] : camel_case_to_underscore($relacionamento ["class"]) . "_id";
+                eval('$relationship_table = ' . $relacionamento ["through"] . '::getInstance()->_tablename();');
                 eval('$this->' . $nome . ' = create_function(\'$order = null, $default_order = "' . $relacionamento["order"] . '"\', \' $order = isNull($order) ? $default_order : $order; return ' . $relacionamento["class"] . '::collection("id IN (SELECT ' . $foreign_key . ' FROM ' . $relationship_table . ' WHERE ' . $relacionamento["field"] . ' = ' . $id . ')", $order); \');');
             }
         }
+    }
+
+    /**
+     * Retorna uma nova instância da classe. Se for passado o atributo type, o objeto criado será deste type
+     * @param array $attributes
+     * @return object
+     */
+    static function newObject($attributes = array()) {
+        eval('$object = new ' . get_called_class() . '($attributes);');
+        if (!vazio($object->getType())) {
+            $object = self::cast($object->getType(), $object);
+        }
+        return $object;
     }
 
     /**
@@ -220,7 +241,7 @@ class MY_Model extends CI_Model {
                 $ultimo = $this->lastRecordOnList();
                 $field = $this->acts_as_list["field"];
                 if ($ultimo) {
-                    $data[$field] = $ultimo->get($field) + 1;
+                    $data [$field] = $ultimo->get($field) + 1;
                 } else {
                     $data[$field] = 1;
                 }
@@ -233,8 +254,12 @@ class MY_Model extends CI_Model {
             if (!$soft && isset($this->acts_as_tree)) {
                 self::rebuildTree();
             }
-
-            return self::find($insert_id);
+            if (!vazio($this->getType())) {
+                eval('$retorno = ' . $this->getType() . '::find($insert_id);');
+                return $retorno;
+            } else {
+                return self::find($insert_id);
+            }
         } else {
             return FALSE;
         }
@@ -246,6 +271,7 @@ class MY_Model extends CI_Model {
      */
     private function update($primary_value, $data, $soft = false) {
         if (gettype($data) == "array") {
+
             foreach ($data as $key => $value) {
                 if (isNull($value)) {
                     $data[$key] = null;
@@ -295,10 +321,13 @@ class MY_Model extends CI_Model {
     static function get_called_class($bt = false, $l = 1) {
         if (!$bt)
             $bt = debug_backtrace();
+
         if (!isset($bt[$l]))
             throw new Exception("Cannot find called class -> stack level too deep.");
-        if (!isset($bt[$l]['type']))
-            throw new Exception('type not set');
+        if (!
+                isset($bt[$l]['type']))
+            throw new Exceptino(
+            'type not set');
         else
             switch ($bt[$l]['type']) {
                 case '::':
@@ -309,8 +338,9 @@ class MY_Model extends CI_Model {
                         $i++;
                         $callerLine = $lines[$bt[$l]['line'] - $i] . $callerLine;
                     } while (stripos($callerLine, $bt[$l]['function']) === false);
-                    preg_match('/([a-zA-Z0-9\_]+)::' . $bt[$l]['function'] . '/', $callerLine, $matches);
-                    if (!isset($matches[1]))
+                    preg_match('/([a-zA-Z0-9\_]+)::' . $bt [$l]['function'] . '/', $callerLine, $matches);
+                    if (!isset(
+                                    $matches[1]))
                         throw new Exception("Could not find caller class: originating method call is obscured.");
                     switch ($matches[1]) {
                         case 'self':
@@ -321,9 +351,11 @@ class MY_Model extends CI_Model {
                     }
                 case '->': switch ($bt[$l]['function']) {
                         case '__get':
-                            if (!is_object($bt[$l]['object']))
+                            if (!is_object($bt[$l]['object']
+                                    ))
                                 throw new Exception("Edge case fail. __get called on non object.");
                             return get_class($bt[$l]['object']);
+
                         default: return $bt[$l]['class'];
                     }
                 default: throw new Exception("Unknown backtrace method type");
@@ -378,9 +410,13 @@ class MY_Model extends CI_Model {
         $CI->db->where($campo, $valor);
         $classname = get_called_class();
         eval('$object = new ' . $classname . '();');
+        if (!vazio($object->getType())) {
+            $CI->db->where("type", $object->getType());
+        }
         $result = $CI->db->get($object->_tablename())->result();
         if (count($result) > 0) {
-            eval('$new = new ' . $classname . '($result[0]);');
+            $type = property_exists($result[0], "type") ? $result[0]->type : $classname;
+            eval('$new = new ' . $type . '($result[0]);');
             HowCore::setCachedObject($new);
             return $new;
         }
@@ -413,10 +449,14 @@ class MY_Model extends CI_Model {
         $CI->db->order_by($order == "_default_order" ? $this->_default_order() : $order);
         $classname = get_called_class();
         eval('$object = new ' . $classname . '();');
+        if (!vazio($object->getType())) {
+            $CI->db->where("type", $object->getType());
+        }
         $result = $CI->db->get($object->_tablename())->result();
         $array = array();
         foreach ($result as $value) {
-            eval('$array[] = new ' . $classname . '($value);');
+            $type = property_exists($value, "type") ? $value->type : $classname;
+            eval('$array[] = new ' . $type . '($value);');
             HowCore::setCachedObject($array[count($array) - 1]);
         }
         return $array;
@@ -431,10 +471,14 @@ class MY_Model extends CI_Model {
         $CI = get_instance();
         $classname = get_called_class();
         eval('$object = new ' . $classname . '();');
+        if (!vazio($object->getType())) {
+            $CI->db->where("type", $object->getType());
+        }
         $CI->db->order_by($order == "_default_order" ? $object->_default_order() : $order);
         $result = $CI->db->get($object->_tablename())->result();
         $array = array();
         foreach ($result as $value) {
+            $type = property_exists($value, "type") ? $value->type : $classname;
             eval('$array[] = new ' . $classname . '($value);');
             HowCore::setCachedObject($array[count($array) - 1]);
         }
@@ -465,6 +509,9 @@ class MY_Model extends CI_Model {
         eval('$object = new ' . $classname . '();');
         $sql = "SELECT * FROM " . $object->_tablename();
         if (gettype($condicoes) == "array") {
+            if (!vazio($object->getType())) {
+                $condicoes["type"] = $object->getType();
+            }
             if (sizeof($condicoes) > 0 || $condicoes != "") {
                 foreach ($condicoes as $condicao => $valor) {
                     if (is_null($valor)) {
@@ -478,12 +525,18 @@ class MY_Model extends CI_Model {
                 }
             }
         } elseif (!empty($condicoes)) {
-            $sql .= " WHERE " . $condicoes;
+            $sql .= " WHERE (" . $condicoes . ")";
+            if (!vazio($object->getType())) {
+                $sql .= " AND type = '" . $object->getType() . "' ";
+            }
+        } elseif (!vazio($object->getType())) {
+            $sql .= " WHERE type = '" . $object->getType() . "' ";
         }
         $sql .= " ORDER BY " . ($order == "_default_order" ? $object->_default_order() : $order);
         $result = $CI->db->query($sql)->result();
         $array = array();
         foreach ($result as $value) {
+            $type = property_exists($value, "type") ? $value->type : $classname;
             eval('$array[] = new ' . $classname . '($value);');
             HowCore::setCachedObject($array[count($array) - 1]);
         }
@@ -505,12 +558,15 @@ class MY_Model extends CI_Model {
         $sql = "SELECT COUNT(1) AS 'quantidade'
                   FROM " . $object->_tablename();
         if (gettype($condicoes) == "array") {
+            if (!vazio($object->getType())) {
+                $condicoes["type"] = $object->getType();
+            }
             if (sizeof($condicoes) > 0 || $condicoes != "") {
                 foreach ($condicoes as $condicao => $valor) {
                     if (is_null($valor)) {
                         $where[] = $condicao . " IS NULL";
                     } else {
-                        $where[] = $condicao . " = '" . $valor . "'";
+                        $where [] = $condicao . " = '" . $valor . "'";
                     }
                 }
                 if (sizeof($where) > 0) {
@@ -518,9 +574,15 @@ class MY_Model extends CI_Model {
                 }
             }
         } elseif (!empty($condicoes)) {
-            $sql .= " WHERE " . $condicoes;
+            $sql .= " WHERE (" . $condicoes . ")";
+            if (!vazio($object->getType())) {
+                $sql .= " AND type = '" . $object->getType() . "' ";
+            }
+        } elseif (!vazio($object->getType())) {
+            $sql .= " WHERE type = '" . $object->getType() . "' ";
         }
         $result = $CI->db->query($sql)->result();
+
         return $result[0]->quantidade;
     }
 
@@ -542,8 +604,9 @@ class MY_Model extends CI_Model {
                 }
             }
 
+
             foreach ($this->has_many as $relation_name => $relationship) {
-                if (isset($relationship["destroy_dependants"]) && $relationship["destroy_dependants"]) {
+                if (isset($relationship ["destroy_dependants"]) && $relationship["destroy_dependants"]) {
                     eval('$objects = $this->' . $relation_name . '();');
                     foreach ($objects as $object) {
                         $object->delete();
@@ -590,6 +653,7 @@ class MY_Model extends CI_Model {
         if (count($validates) > 0 || !$is_valid_as_tree) {
             $old_post = $_POST;
             $array = $this->toArray();
+
             foreach ($array as $key => $item) {
                 $_POST[$key] = $item;
             }
@@ -634,6 +698,7 @@ class MY_Model extends CI_Model {
     public function getErrorsAsString($separator = "") {
         $errors = $this->getErrorsAsArray();
         $list = array();
+
         foreach ($errors as $field => $error) {
             $list[] = $error;
         }
@@ -800,7 +865,12 @@ class MY_Model extends CI_Model {
         if (isset($this->_table) && !isNull($this->_table)) {
             return $this->_table;
         } else {
-            return camel_case_to_underscore(get_class($this));
+            $parent_class = get_parent_class($this);
+            if ($parent_class == "MY_Model" || $parent_class == "CI_Model") {
+                return camel_case_to_underscore(get_class($this));
+            } else {
+                return camel_case_to_underscore($parent_class);
+            }
         }
     }
 
@@ -826,6 +896,44 @@ class MY_Model extends CI_Model {
         foreach ($array as $key => $value) {
             $this->set($key, $value);
         }
+    }
+
+    /**
+     * Class casting
+     *
+     * @param string|object $destination
+     * @param object $sourceObject
+     * @return object
+     */
+    static function cast($destination, $sourceObject) {
+        if (is_string($destination)) {
+            $destination = new $destination();
+        }
+        $sourceReflection = new ReflectionObject($sourceObject);
+        $destinationReflection = new ReflectionObject($destination);
+        $sourceProperties = $sourceReflection->getProperties();
+        foreach ($sourceProperties as $sourceProperty) {
+            $sourceProperty->setAccessible(true);
+            $name = $sourceProperty->getName();
+            $value = $sourceProperty->getValue($sourceObject);
+            if ($destinationReflection->hasProperty($name)) {
+                $propDest = $destinationReflection->getProperty($name);
+                $propDest->setAccessible(true);
+                $propDest->setValue($destination, $value);
+            } else {
+                $destination->$name = $value;
+            }
+        }
+        return $destination;
+    }
+
+    /**
+     * Verifica se o objeto é de determinada classe
+     * @param string $class
+     * @return boolean
+     */
+    function isA($class) {
+        return get_called_class() == $class;
     }
 
 ###########################################
@@ -927,7 +1035,7 @@ class MY_Model extends CI_Model {
             if (vazio($acts_as_list["scope"])) {
                 $ultimo = array_first(self::collection("", $field . " DESC LIMIT 1"));
             } else {
-                $ultimo = array_first(self::collection($this->whereClauseFromScope(), $field . " DESC LIMIT 1"));
+                $ultimo = array_first(self:: collection($this->whereClauseFromScope(), $field . " DESC LIMIT 1"));
             }
             return $ultimo;
         } else {
@@ -987,8 +1095,7 @@ class MY_Model extends CI_Model {
                     } else {
                         $where[] = $attr . " IS NULL ";
                     }
-                }
-                $where = implode(" AND ", $where);
+                } $where = implode(" AND ", $where);
                 return $where;
             }
         }
@@ -1071,7 +1178,7 @@ class MY_Model extends CI_Model {
      */
     function numberOfDescendants() {
         if (isset($this->acts_as_tree)) {
-            return (($this->getRgt() - $this->getLft() - 1) / 2);
+            return ( ($this->getRgt() - $this->getLft() - 1) / 2);
         }
         return null;
     }
@@ -1140,6 +1247,7 @@ class MY_Model extends CI_Model {
         $level = $this->getLvl();
         if ($level >= 0) {
             $pad = str_pad("", ($this->getLvl() - 1) * strlen($separator), $separator, STR_PAD_LEFT);
+
             return $pad . $this->get($field);
         }
         return $this->get($field);
